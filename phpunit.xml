@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.5/phpunit.xsd"
+         bootstrap="vendor/codeigniter4/framework/system/Test/bootstrap.php"
+         backupGlobals="false"
+         beStrictAboutCoversAnnotation="true"
+         beStrictAboutOutputDuringTests="true"
+         beStrictAboutTodoAnnotatedTests="true"
+         colors="true"
+         convertErrorsToExceptions="true"
+         convertNoticesToExceptions="true"
+         convertWarningsToExceptions="true"
+         failOnRisky="true"
+         failOnWarning="true"
+         stopOnFailure="false"
+         verbose="true">
+    <testsuites>
+        <testsuite name="CI4 Settings Test Suite">
+            <directory>tests</directory>
+        </testsuite>
+    </testsuites>
+
+    <coverage includeUncoveredFiles="true"
+              processUncoveredFiles="true"
+              pathCoverage="false"
+              ignoreDeprecatedCodeUnits="true"
+              disableCodeCoverageIgnore="true">
+        <include>
+            <directory suffix=".php">src</directory>
+        </include>
+        <exclude>
+            <directory>src/Database/Migrations</directory>
+            <file>src/Helpers/settings_helper.php</file>
+        </exclude>
+    </coverage>
+
+    <php>
+        <env name="app.baseURL" value="http://localhost:8080/"/>
+        <env name="database.tests.strictOn" value="true"/>
+        <env name="database.tests.DBDriver" value="SQLite3"/>
+        <env name="database.tests.database" value=":memory:"/>
+    </php>
+</phpunit>

@@ -1,0 +1,34 @@
+{
+    "name": "olajideolamide/ci4-settings",
+    "description": "Application settings and feature flags library for CodeIgniter 4",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Olanrewaju Olajide",
+            "email": "olajide@example.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require": {
+        "php": "^7.4 || ^8.0"
+    },
+    "require-dev": {
+        "codeigniter4/framework": "^4.0",
+        "phpunit/phpunit": "^9.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "Olajideolamide\\CI4Settings\\": "src/"
+        },
+        "files": [
+            "src/Helpers/settings_helper.php"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    }
+}
