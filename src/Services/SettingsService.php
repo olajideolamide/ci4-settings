@@ -155,7 +155,8 @@ class SettingsService
             case 'boolean':
                 return filter_var($value, FILTER_VALIDATE_BOOLEAN);
             case 'json':
-                return json_decode($value, true);
+                $decoded = json_decode($value, true);
+                return $decoded !== null ? $decoded : [];
             case 'string':
             default:
                 return $value;
@@ -195,7 +196,8 @@ class SettingsService
     protected function prepareValue($value, string $type): string
     {
         if ($type === 'json') {
-            return json_encode($value);
+            $encoded = json_encode($value);
+            return $encoded !== false ? $encoded : '{}';
         }
         
         if ($type === 'boolean') {

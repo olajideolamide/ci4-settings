@@ -12,7 +12,11 @@ if (!function_exists('settings')) {
      */
     function settings(?string $key = null, $default = null)
     {
-        $service = new SettingsService();
+        static $service = null;
+        
+        if ($service === null) {
+            $service = new SettingsService();
+        }
         
         if ($key === null) {
             return $service;
@@ -32,7 +36,12 @@ if (!function_exists('feature')) {
      */
     function feature(string $key, bool $default = false): bool
     {
-        $service = new SettingsService();
+        static $service = null;
+        
+        if ($service === null) {
+            $service = new SettingsService();
+        }
+        
         return $service->feature($key, $default);
     }
 }

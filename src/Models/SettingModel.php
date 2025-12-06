@@ -43,6 +43,21 @@ class SettingModel extends Model
     protected $afterDelete    = [];
 
     /**
+     * Apply context filter to builder
+     *
+     * @param string|null $context
+     * @return $this
+     */
+    protected function applyContextFilter(?string $context = null)
+    {
+        if ($context !== null) {
+            $this->where('context', $context);
+        }
+        
+        return $this;
+    }
+
+    /**
      * Get a setting by key
      *
      * @param string $key
@@ -51,13 +66,9 @@ class SettingModel extends Model
      */
     public function getSetting(string $key, ?string $context = null): ?array
     {
-        $builder = $this->where('key', $key);
-        
-        if ($context !== null) {
-            $builder->where('context', $context);
-        }
-        
-        return $builder->first();
+        return $this->where('key', $key)
+            ->applyContextFilter($context)
+            ->first();
     }
 
     /**
@@ -96,12 +107,8 @@ class SettingModel extends Model
      */
     public function deleteSetting(string $key, ?string $context = null): bool
     {
-        $builder = $this->where('key', $key);
-        
-        if ($context !== null) {
-            $builder->where('context', $context);
-        }
-        
-        return $builder->delete();
+        return $this->where('key', $key)
+            ->applyContextFilter($context)
+            ->delete();
     }
 }
