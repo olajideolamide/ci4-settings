@@ -1,0 +1,15 @@
+{
+  "name": "olajideolamide/ci4-settings",
+  "description": "Application settings and feature flags library for CodeIgniter 4",
+  "type": "library",
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "Jide\\Settings\\": "src/"
+    }
+  },
+  "require": {
+    "php": "^8.0",
+    "codeigniter4/framework": "^4.0"
+  }
+}
