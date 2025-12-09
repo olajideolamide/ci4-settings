@@ -1,4 +1,9 @@
-# CodeIgniter 4 Settings & Feature Flags Library
+<picture>
+        <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/banner.png">
+        <img alt="Logo for laravel-activitylog" src="docs/screenshots/banner.png">
+</picture>
+
+<h1>CodeIgniter 4 Settings & Feature Flags Library</h1>
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/olajideolamide/ci4-settings.svg)](https://packagist.org/packages/olajideolamide/ci4-settings)
 ![GitHub License](https://img.shields.io/github/license/olajideolamide/ci4-settings)
