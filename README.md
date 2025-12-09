@@ -1,21 +1,36 @@
-# ci4-settings
+# CodeIgniter 4 Settings & Feature Flags Library
 
-Application settings and feature flags library for **CodeIgniter 4**.
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/olajideolamide/ci4-settings.svg?style=flat-square)](https://packagist.org/packages/olajideolamide/ci4-settings)
 
-- Store key/value settings in the database (`settings` table).
-- Access them via a simple helper: `settings('site.name')`.
-- Manage feature flags with `feature('new_checkout')`.
-- Includes a simple Bootstrap 5 admin UI to manage settings in the browser.
+Database-backed application settings and feature flags for CodeIgniter 4, with dot-notation support, automatic type casting, and optional caching.
+
+This package gives you a simple `settings()` helper and a small `Settings` library so you can store configuration in the database instead of hard-coding everything in config files.
 
 ---
 
 ## Features
 
-- Simple key/value storage with type casting (string, bool, int, float, json).
-- Optional grouping (e.g. `site`, `mail`, `features`).
-- Feature flags with a dedicated `feature()` helper.
-- Configurable caching using CodeIgniter's cache service.
-- Admin UI (controller + views) to create, edit and delete settings.
+- Database-backed settings using a dedicated `settings` table
+- Feature flags via a simple `feature('flag_name')` helper
+- Dot-notation keys like `app.name`, `mail.smtp.host`, etc.
+- Automatic type detection & casting
+    - `bool`, `int`, `float`, `string`, `json` (arrays/objects)
+- Nested settings & JSON
+    - Store arrays/objects and access them via dot notation
+- Optional caching via CodeIgniter’s cache system
+- Convenience helpers
+    - `settings()` – get/set/delete settings
+    - `feature()` – check if a feature flag is enabled
+- Smart delete
+    - Can remove nested keys from JSON settings (e.g. remove `app.mail.host` from a stored `app.mail` JSON blob)
+
+---
+
+## Requirements
+
+- PHP **8.0+**
+- CodeIgniter **4.x**
+- A database supported by CodeIgniter 4
 
 ---
 
@@ -23,274 +38,389 @@ Application settings and feature flags library for **CodeIgniter 4**.
 
 ### 1. Install via Composer
 
-After you publish this package to Packagist:
-
 ```bash
-composer require jide/ci4-settings
+composer require olajideolamide/ci4-settings
 ```
 
-If you are using it directly from GitHub as a VCS repository, add this to your main app's `composer.json`:
+### 2. Register the namespace (if needed)
 
-```json
-"repositories": [
-  {
-    "type": "vcs",
-    "url": "https://github.com/YOUR_GITHUB_USERNAME/ci4-settings"
-  }
-],
-"require": {
-  "jide/ci4-settings": "^1.0"
-}
+In most Composer-based CodeIgniter 4 apps, Composer’s autoloader is already wired up.  
+If you are using modules and explicit namespaces, add the package namespace to `app/Config/Autoload.php`:
+
+```php
+// app/Config/Autoload.php
+
+public $psr4 = [
+    APP_NAMESPACE => APPPATH,
+    'Config'      => APPPATH . 'Config',
+
+    // Add this line (keep your existing entries)
+    'Jide\Settings' => ROOTPATH . 'vendor/olajideolamide/ci4-settings/src',
+];
 ```
-
-Then run:
-
-```bash
-composer update
-```
-
-### 2. Make sure classes are autoloadable
-
-Composer will autoload everything in `src/` via the namespace `Jide\\Settings\\`.
-
-You don't need to touch `app/Config/Autoload.php` if you rely on Composer.
 
 ### 3. Run the migration
 
-Copy the migration file from the package into your app (simplest approach):
+This package ships with a migration that creates the `settings` table.
 
-From:
-
-```text
-vendor/jide/ci4-settings/src/Database/Migrations/2025-12-06-000000_create_settings_table.php
-```
-
-To:
-
-```text
-app/Database/Migrations/2025-12-06-000000_create_settings_table.php
-```
-
-Then run:
+Run:
 
 ```bash
-php spark migrate
+php spark migrate -n Jide\Settings
 ```
 
-This will create the `settings` table.
+This will create a table named `settings` with columns:
 
-> Advanced users can add the package migration path to `Config\Migrations` instead of copying.
+- `id` (INT, PK, auto-increment)
+- `key` (VARCHAR, unique)
+- `value` (TEXT)
+- `type` (VARCHAR – `string`, `bool`, `int`, `float`, `json`, etc.)
+- `group` (VARCHAR, nullable) – optional grouping for your own use
+- `is_feature` (TINYINT(1)) – marks a setting as a feature flag
+- `created_at`, `updated_at` (DATETIME, nullable)
 
 ### 4. Load the helper
 
-Either load the helper where needed:
+To use the `settings()` and `feature()` helpers, load the helper:
+
+**Per controller / per use:**
 
 ```php
 helper('settings');
 ```
 
-Or add it to `app/Config/Autoload.php`:
+**Globally (recommended):**
+
+In `app/Config/Autoload.php`:
 
 ```php
 public $helpers = ['settings'];
 ```
 
+Or in a base controller:
+
+```php
+protected $helpers = ['settings'];
+```
+
 ---
 
-## Basic usage
+## Quick Start
+
+Once installed, migrated, and the helper is loaded, you can start using it immediately.
 
 ### Get a setting
 
 ```php
-helper('settings');
-
-$siteName = settings('site.name', 'My App');
-$timezone = settings('app.timezone', 'Africa/Lagos');
+// Get 'app.name', return 'My App' if it doesn't exist
+$appName = settings('app.name', 'My App');
 ```
 
-### Set / update a setting
+### Set a setting
 
 ```php
-$settings = settings(); // returns the library instance
-
-// string
-$settings->set('site.name', 'Nora Exchange', 'site');
-
-// int
-$settings->set('app.max_users', 500, 'app');
-
-// array (stored as JSON)
-$settings->set('mail.smtp', [
-    'host' => 'smtp.example.com',
-    'port' => 587,
-], 'mail');
+// Using the helper to get the library instance
+settings()->set('app.name', 'My Awesome App');
 ```
 
-### Check feature flags
+### Check if a setting exists
 
 ```php
-// Somewhere in your bootstrap or a seeder:
-$settings->set('feature.new_dashboard', true, 'features', true);
-$settings->set('feature.beta_checkout', false, 'features', true);
-
-// In controllers / views:
-if (feature('new_dashboard')) {
-    // Load the new dashboard
-} else {
-    // Load the old dashboard
-}
-
-// With default value if flag not set:
-if (feature('experimental_widget', false)) {
-    // ...
+if (settings()->has('app.name')) {
+    // do something
 }
 ```
 
 ### Delete a setting
 
 ```php
-$settings->delete('feature.experimental_widget');
+settings()->delete('app.name');
 ```
 
-### Get all settings
+### Access all settings
 
 ```php
-$all = settings()->all(); // returns [ 'site.name' => '...', ... ]
+$config = settings()->all(); // returns nested array of all settings
 ```
+
+---
+
+## Feature Flags
+
+Feature flags make it easy to toggle functionality on or off without redeploying code.
+
+### Enable a feature flag
+
+Feature flags are stored as keys under the `feature.` namespace, for example: `feature.new_checkout`.
+
+```php
+// Create or update a feature flag
+settings()->set(
+    'feature.new_checkout',
+    true,                // value
+    'checkout',          // optional group
+    true                 // is_feature = true
+);
+```
+
+### Check if a feature is enabled (helper)
+
+```php
+if (feature('new_checkout')) {
+    // show new checkout flow
+} else {
+    // fallback to old flow
+}
+```
+
+You can also pass the full key:
+
+```php
+if (feature('feature.new_checkout')) {
+    // also works
+}
+```
+
+### Check with a default value
+
+```php
+if (feature('beta_banner', false)) {
+    // only runs if explicitly enabled
+}
+```
+
+Under the hood, `feature('something')`:
+
+- Ensures the key is prefixed with `feature.` if you didn’t add it
+- Reads the setting
+- Casts it to a boolean using common truthy representations: `1`, `true`, `yes`, `on` (case-insensitive)
+
+---
+
+## Dot-Notation & Nested Settings
+
+This library supports **dot-notation** for keys, and can store arrays/objects as JSON.
+
+### Storing a nested array
+
+```php
+settings()->set('mail', [
+    'host'       => 'smtp.example.com',
+    'port'       => 587,
+    'encryption' => 'tls',
+    'username'   => 'user@example.com',
+    'password'   => 'secret',
+]);
+```
+
+Internally this is saved as:
+
+- `key`   = `mail`
+- `type`  = `json`
+- `value` = JSON encoding of the array
+
+### Reading nested values
+
+```php
+$host = settings('mail.host');       // "smtp.example.com"
+$port = settings('mail.port');       // 587 (int)
+$enc  = settings('mail.encryption'); // "tls"
+```
+
+### Updating part of a JSON setting
+
+You can overwrite the whole array:
+
+```php
+settings()->set('mail', [
+    'host' => 'smtp2.example.com',
+] + settings('mail', []));
+```
+
+Or add nested configuration piece by piece using a more granular key:
+
+```php
+$config = settings()->all(); // or build what you need
+
+// For example, to create a grouped "app" config
+settings()->set('app', [
+    'name' => 'My App',
+    'mail' => [
+        'host' => 'smtp.example.com',
+    ],
+]);
+
+// Later, read:
+$host = settings('app.mail.host');
+```
+
+When JSON values are loaded, they are decoded into arrays and merged into the full settings structure so that dot-paths like `app.mail.host` work as expected.
+
+---
+
+## Type Handling
+
+The library automatically detects and casts types based on the value you set.
+
+### Detection
+
+When you call `set($key, $value, ...)`, the library determines:
+
+- `bool`   → stored as `'1'` or `'0'`, returned as `bool`
+- `int`    → stored as string, returned as `int`
+- `float`  → stored as string, returned as `float`
+- `array` / `object` → stored as JSON (`type = json`), returned as array
+- anything else → stored and returned as `string`
+
+### Casting on read
+
+When you call `get()` or `settings('key')`:
+
+- If `type = bool` it’s converted using a liberal boolean parser:
+    - `1`, `true`, `yes`, `on` → `true`
+    - Anything else → `false`
+- If `type = int` → `(int)$value`
+- If `type = float` → `(float)$value`
+- If `type = json` → `json_decode()` to an array
+- Otherwise → raw string
+
+---
+
+## Settings Helper & Library API
+
+### `settings(?string $key = null, mixed $default = null)`
+
+- If **no key** is passed (`settings()`):
+    - Returns an instance of `Jide\Settings\Libraries\Settings`
+- If **a key** is passed (`settings('app.name')`):
+    - Returns the setting value (typed) or `$default` if not found
+
+**Examples:**
+
+```php
+// Get instance
+$settings = settings();
+
+// Get value
+$appName = settings('app.name', 'My App');
+
+// Chain methods
+settings()->set('app.name', 'My App');
+```
+
+### `feature(string $flag, bool $default = false): bool`
+
+Convenience wrapper around `Settings::featureEnabled()`.
+
+- Accepts either `new_checkout` or `feature.new_checkout`
+- Returns `bool`
+
+---
+
+### `Jide\Settings\Libraries\Settings` methods
+
+If you prefer to work with the library directly:
+
+```php
+use Jide\Settings\Libraries\Settings;
+
+$settings = new Settings(); // uses default config and model
+```
+
+Available methods:
+
+- `get(string $key, $default = null): mixed`  
+  Get a setting by key (supports dot notation).
+
+- `set(string $key, $value, ?string $group = null, bool $isFeature = false): bool`  
+  Create or update a setting.
+
+- `all(): array`  
+  Get all settings as a nested array.
+
+- `has(string $key): bool`  
+  Check if a setting exists (supports dot notation).
+
+- `delete(string $key): bool`  
+  Delete a setting by key.  
+  Also attempts to remove nested keys from JSON parent entries (e.g. `app.mail.host` inside `app.mail`).
+
+- `featureEnabled(string $flag, bool $default = false): bool`  
+  Check if a feature flag is enabled.
 
 ---
 
 ## Caching
 
-By default, settings are cached using CodeIgniter's cache service (`cache()` helper).
-
-You can change this behaviour by publishing and editing the config:
+This library uses a small config class to control caching:
 
 ```php
-$config = new \Jide\Settings\Config\Settings();
+// Jide\Settings\Config\Settings
 
-// config/Settings.php (copy from vendor if you want to customise)
-public bool $useCache = true;
-public int  $cacheTTL = 600;
+public string $table    = 'settings';
+public bool   $useCache = true;
+public int    $cacheTTL = 600;        // seconds
+public string $cacheKey = 'ci4_settings';
 ```
 
-If you don't want caching, set `$useCache = false;`.
+By default:
 
----
+- All settings are cached in memory on first request
+- If CodeIgniter’s `cache()` function is available and `$useCache` is `true`:
+    - The settings array is stored under `$cacheKey` for `$cacheTTL` seconds
+- Any `set()` or `delete()` call automatically clears the cache
 
-## Admin UI
-
-The package includes a small Bootstrap 5-based admin UI for managing settings in the browser.
-
-### View namespace
-
-In your **main app** (`app/Config/Views.php`), register the view namespace:
+If you want to customise these values at runtime, you can instantiate the library with your own config:
 
 ```php
-public array $viewNamespaces = [
-    // existing namespaces...
+use Jide\Settings\Config\Settings as SettingsConfig;
+use Jide\Settings\Libraries\Settings;
 
-    'JideSettings' => ROOTPATH . 'vendor/jide/ci4-settings/src/Views',
-];
+// Create custom config
+$config = new SettingsConfig();
+$config->useCache = false;
+$config->cacheTTL = 0;
+$config->table    = 'app_settings'; // if you also customised the migration
+
+$settings = new Settings($config);
 ```
 
-(Adjust the path if your package name or install path differs.)
+> Note: the `helper('settings')` uses `new Settings()` with the **default** config.  
+> If you need a customised config, create your own `Settings` instance as above.
 
-### Routes
+---
 
-In `app/Config/Routes.php`:
+## Building an Admin UI (Optional)
+
+The table contains extra metadata to help you build an admin/settings UI:
+
+- `group` – group related settings (e.g. `mail`, `app`, `billing`)
+- `is_feature` – mark which rows are feature flags so you can list them separately
+
+Example: only list feature flags:
 
 ```php
-$routes->group('admin/settings', [
-    'namespace' => 'Jide\Settings\Controllers',
-    // 'filter'    => 'auth', // optionally protect with your auth filter
-], static function ($routes) {
-    $routes->get('/', 'SettingsAdminController::index');
-    $routes->get('create', 'SettingsAdminController::create');
-    $routes->post('create', 'SettingsAdminController::create');
-    $routes->get('edit/(:num)', 'SettingsAdminController::edit/$1');
-    $routes->post('update/(:num)', 'SettingsAdminController::update/$1');
-    $routes->post('delete/(:num)', 'SettingsAdminController::delete/$1');
-});
+use Jide\Settings\Models\SettingModel;
+
+$model = new SettingModel();
+
+$flags = $model
+    ->where('is_feature', 1)
+    ->orderBy('key', 'ASC')
+    ->findAll();
 ```
-
-Now visit:
-
-- `https://your-app.test/admin/settings` – list settings
-- `https://your-app.test/admin/settings/create` – create a new setting
-
----
-
-## Screenshots
-
-Here’s a quick look at the built-in admin UI for managing settings.
-
-### Settings List
-
-![Settings List](docs/screenshots/settings-index.png)
-
-The main list shows all settings grouped by **Group**, with **Key**, **Value**, **Type**, and whether it is a **Feature flag**.  
-From here you can quickly **edit** or **delete** any setting, or click **Add Setting** to create a new one.
-
----
-
-### Create Setting
-
-![Create Setting](docs/screenshots/create-setting.png)
-
-The create form allows you to:
-
-- Define a unique **key** (e.g. `site.name`, `feature.new_dashboard`)
-- Optionally group settings (e.g. `site`, `mail`, `features`)
-- Choose a **type**: `string`, `bool`, `int`, `float`, or `json`
-- Enter the **value** with helper text for boolean and JSON fields
-- Flag it as a **feature flag** for use with the `feature()` helper
-
----
-
-### Edit Setting
-
-![Edit Setting](docs/screenshots/edit-setting.png)
-
-The edit screen lets you update existing settings safely, with validation and the same type/value hints as the create form.  
-Changes take effect immediately and cached values are automatically invalidated.
-
----
-
-## Manual installation (without Composer)
-
-1. Copy the `src/` folder into your app, e.g.:
-
-   ```text
-   app/ThirdParty/Settings/
-   ```
-
-2. Update `app/Config/Autoload.php`:
-
-   ```php
-   public $psr4 = [
-       APP_NAMESPACE => APPPATH,
-       'Config'      => APPPATH . 'Config',
-       'Jide\\Settings\\' => APPPATH . 'ThirdParty/Settings',
-   ];
-   ```
-
-3. Copy the migration file into `app/Database/Migrations/` and run:
-
-   ```bash
-   php spark migrate
-   ```
-
-4. Copy the helper file to `app/Helpers/settings_helper.php` or configure the helper path, then:
-
-   ```php
-   helper('settings');
-   ```
-
-5. Use as shown above.
 
 ---
 
 ## License
 
-MIT (or your preferred open source license).
+This project is open-source software licensed under the [MIT license](LICENSE).
+
+---
+
+## Author
+
+**Olanrewaju “Jide” Olajide**
+
+- Package: `olajideolamide/ci4-settings`
+- PRs, issues and suggestions are welcome!
