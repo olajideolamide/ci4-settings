@@ -36,7 +36,7 @@ class Settings
     /**
      * Set a setting (create or update).
      */
-    public function set(string $key, $value, ?string $group = null, bool $isFeature = false): bool
+    public function set(string $key, mixed $value, ?string $group = null, bool $isFeature = false): bool
 
     {
         $type  = $this->detectType($value);
