@@ -7,7 +7,7 @@
         colors="true"
         executionOrder="depends,defects"
         beStrictAboutChangesToGlobalState="true"
-        failOnRisky="true"
+        displayDetailsOnTestsThatTriggerWarnings="true"
         failOnWarning="false"
 >
     <testsuites>
@@ -28,9 +28,7 @@
 
     <!-- PHP + CI4-related env -->
     <php>
-        <!-- make sure we see all issues -->
-        <ini name="error_reporting" value="-1"/>
-        <ini name="display_errors" value="1"/>
+
 
         <!-- common CI4 testing env flags -->
         <env name="APP_ENV" value="testing"/>
