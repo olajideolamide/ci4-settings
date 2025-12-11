@@ -1,8 +1,6 @@
 name: Github Action for CI4 Settings and Feature Flag Library
 
 on:
-  push:
-    branches: [ "main", "develop" ]
   pull_request:
     branches: [ "main", "develop" ]
   # Manual runs from the Actions tab
