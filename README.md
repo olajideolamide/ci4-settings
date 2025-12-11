@@ -7,6 +7,8 @@
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/olajideolamide/ci4-settings.svg)](https://packagist.org/packages/olajideolamide/ci4-settings)
 ![GitHub License](https://img.shields.io/github/license/olajideolamide/ci4-settings)
+![PHP CI](https://github.com/olajideolamide/ci4-settings/actions/workflows/action.yml/badge.svg)
+
 
 
 Database-backed application settings and feature flags for CodeIgniter 4, with dot-notation support, automatic type casting, and optional caching.

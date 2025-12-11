@@ -1,4 +1,4 @@
-name: Github Action for CI4 Settings and Feature Flag Library
+name: PHPUnit
 
 on:
   pull_request:
