@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<ruleset name="CodeIgniter 4 Settings Library Standard">
+    <description>
+        Coding standard for the CI4 Settings / Feature Flag library.
+        Applies PSR-12 to src/ and tests/ while ignoring vendor and build artifacts.
+    </description>
+
+    <!-- Directories to scan -->
+    <file>src</file>
+    <file>tests</file>
+
+    <!-- Exclusions -->
+    <exclude-pattern>vendor/*</exclude-pattern>
+    <exclude-pattern>var/*</exclude-pattern>
+    <exclude-pattern>build/*</exclude-pattern>
+    <exclude-pattern>.phpunit.cache/*</exclude-pattern>
+    <exclude-pattern>.phpstan/*</exclude-pattern>
+
+    <!-- Global options -->
+    <arg name="colors"/>
+    <arg name="encoding" value="utf-8"/>
+    <arg name="extensions" value="php"/>
+    <arg name="parallel" value="4"/>
+
+    <!-- Base standard -->
+    <rule ref="PSR12">
+        <!-- Optional relaxations: -->
+
+        <!-- Ignore long lines (useful for long arrays, SQL, etc.) -->
+        <exclude name="Generic.Files.LineLength.TooLong"/>
+
+        <!-- Allow tabs in indentation -->
+        <!-- <exclude name="Generic.WhiteSpace.DisallowTabIndent.TabsUsed"/> -->
+    </rule>
+
+    <!-- Extra generic rules (optional) -->
+    <rule ref="Generic.Commenting.Todo"/>
+</ruleset>

@@ -1,1 +1,10 @@
 .idea/
+vendor/
+var/
+*.cache
+composer.lock
+.DS_Store
+.vscode/
+phpunit
+build/
+phpunit*.xml

@@ -1,0 +1,32 @@
+includes:
+    # Extra rules for PHPUnit test classes (optional but nice)
+    - vendor/phpstan/phpstan-phpunit/extension.neon
+
+parameters:
+    level: 5
+
+    paths:
+        - src
+        - tests
+
+    tmpDir: var/phpstan
+
+    # Ensure Composer autoload is loaded so all classes are known
+    bootstrapFiles:
+        - vendor/autoload.php
+        - vendor/codeigniter4/framework/system/Test/bootstrap.php
+
+    # Some stricter checks that are very useful
+    checkMissingIterableValueType: true
+    checkGenericClassInNonGenericObjectType: true
+    checkMissingVarTagTypehint: true
+    reportUnmatchedIgnoredErrors: true
+
+    # Option to relax PHPDoc certainty
+    treatPhpDocTypesAsCertain: false
+
+    # Prevents CodeIgniter dynamic properties/magic,
+    # from causing PHPStan to scream too much
+    #ignoreErrors:
+        #- '#^Call to an undefined method CodeIgniter\\.*#'
+        #- '#^Access to an undefined property CodeIgniter\\.*#'

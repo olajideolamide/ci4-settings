@@ -8,8 +8,40 @@
       "Jide\\Settings\\": "src/"
     }
   },
+  "autoload-dev": {
+    "psr-4": {
+      "Jide\\Settings\\Tests\\": "tests/"
+    }
+  },
   "require": {
-    "php": "^8.0",
-    "codeigniter4/framework": "^4.0"
-  }
+    "php": "^8.2"
+  },
+  "require-dev": {
+    "codeigniter4/framework": "^4.0",
+    "phpunit/phpunit": "^10.0",
+    "phpstan/phpstan": "^1.11",
+    "phpstan/phpstan-phpunit": "^1.4",
+    "squizlabs/php_codesniffer": "^3.9",
+    "friendsofphp/php-cs-fixer": "^3.0",
+    "systemsdk/phpcpd": "^7.0.1"
+  },
+  "scripts": {
+    "test": "phpunit --testdox",
+    "analyse": "phpstan analyse src tests",
+    "deduplicate": "phpcpd src/ tests/",
+    "cs": "phpcs",
+    "cs-fix": "phpcbf",
+    "style": "@cs-fix",
+    "ci": [
+      "@cs",
+      "@deduplicate",
+      "@analyse",
+      "@test"
+    ]
+  },
+  "config": {
+    "sort-packages": true
+  },
+  "minimum-stability": "stable",
+  "prefer-stable": true
 }
