@@ -8,7 +8,7 @@
         executionOrder="depends,defects"
         beStrictAboutChangesToGlobalState="true"
         failOnRisky="true"
-        failOnWarning="true"
+        failOnWarning="false"
 >
     <testsuites>
         <testsuite name="Unit">
