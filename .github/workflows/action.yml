@@ -109,5 +109,5 @@ jobs:
         if: ${{ hashFiles('.php-cs-fixer.dist.php', '.php-cs-fixer.php') != '' }}
         run: |
           if [ -f vendor/bin/phpcbf ]; then
-            vendor/bin/phpcbf fix --dry-run --diff
+            vendor/bin/phpcbf
           fi
