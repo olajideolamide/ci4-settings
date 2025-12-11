@@ -26,7 +26,7 @@ class Settings
     /**
      * Get a setting by key (supports dot notation).
      */
-    public function get(string $key, $default = null): mixed
+    public function get(string $key, mixed $default = null): mixed
     {
         $all = $this->all();
 
@@ -37,7 +37,6 @@ class Settings
      * Set a setting (create or update).
      */
     public function set(string $key, mixed $value, ?string $group = null, bool $isFeature = false): bool
-
     {
         $type  = $this->detectType($value);
         $value = $this->prepareValue($value, $type);
@@ -211,7 +210,7 @@ class Settings
         return match ($type) {
             'bool' => $value ? '1' : '0',
             'json' => json_encode($value),
-            default => (string)$value,
+            default => (string) $value,
         };
     }
 
@@ -300,14 +299,14 @@ class Settings
      * Set a value into an array using dot path.
      * If \$mergeArrays is true and both existing and new values are arrays, they will be merged.
      */
-    protected function arraySet(array & $array, string $path, $value, bool $mergeArrays = false): void
+    protected function arraySet(array &$array, string $path, $value, bool $mergeArrays = false): void
     {
         if ($path === '') {
             return;
         }
 
         // If no dots just set top-level key
-        if ( ! str_contains($path, '.')) {
+        if (! str_contains($path, '.')) {
             if ($mergeArrays && isset($array[$path]) && is_array($array[$path]) && is_array($value)) {
                 $array[$path] = $this->arrayMergeRecursiveDistinct($array[$path], $value);
             } else {
@@ -317,7 +316,7 @@ class Settings
         }
 
         $segments = explode('.', $path);
-        $current =& $array;
+        $current = & $array;
 
         foreach ($segments as $i => $seg) {
             if ($i === count($segments) - 1) {
@@ -334,17 +333,17 @@ class Settings
                 $current[$seg] = [];
             }
 
-            $current =& $current[$seg];
+            $current = & $current[$seg];
         }
     }
 
-    protected function arrayUnset(array & $array, string $path): void
+    protected function arrayUnset(array &$array, string $path): void
     {
         if ($path === '') {
             return;
         }
 
-        if ( ! str_contains($path, '.')) {
+        if (! str_contains($path, '.')) {
             if (array_key_exists($path, $array)) {
                 unset($array[$path]);
             }
@@ -353,14 +352,14 @@ class Settings
 
         $segments = explode('.', $path);
         $stack = [];
-        $current =& $array;
+        $current = & $array;
 
         foreach ($segments as $seg) {
             if (!is_array($current) || !array_key_exists($seg, $current)) {
                 return; // nothing to unset
             }
             $stack[] = [&$current, $seg];
-            $current =& $current[$seg];
+            $current = & $current[$seg];
         }
 
         // unset last

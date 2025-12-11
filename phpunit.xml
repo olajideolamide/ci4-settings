@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.5/phpunit.xsd"
+        bootstrap="vendor/autoload.php"
+        cacheDirectory=".phpunit.cache"
+        colors="true"
+        executionOrder="depends,defects"
+        beStrictAboutChangesToGlobalState="true"
+        failOnRisky="true"
+        failOnWarning="true"
+>
+    <testsuites>
+        <testsuite name="Unit">
+            <directory suffix="Test.php">tests</directory>
+        </testsuite>
+    </testsuites>
+
+    <source>
+        <include>
+            <directory suffix=".php">src</directory>
+        </include>
+        <exclude>
+            <directory>vendor</directory>
+            <directory>tests</directory>
+        </exclude>
+    </source>
+
+    <!-- PHP + CI4-related env -->
+    <php>
+        <!-- make sure we see all issues -->
+        <ini name="error_reporting" value="-1"/>
+        <ini name="display_errors" value="1"/>
+
+        <!-- common CI4 testing env flags -->
+        <env name="APP_ENV" value="testing"/>
+        <env name="CI_ENVIRONMENT" value="testing"/>
+
+        <!-- useful if anything -->
+        <env name="app.baseURL" value="http://localhost/"/>
+
+        <!-- testDB:
+        <env name="database.default.DBDriver" value="SQLite3"/>
+        <env name="database.default.database" value=":memory:"/>
+        -->
+    </php>
+
+</phpunit>

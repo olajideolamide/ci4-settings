@@ -18,5 +18,4 @@ class SettingModel extends Model
         'group',
         'is_feature',
     ];
-    
 }
