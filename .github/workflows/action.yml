@@ -10,8 +10,7 @@ on:
 
 jobs:
   tests:
-    name: PHP ${{ matrix.php }}
-    deps: ${{ matrix.deps }}
+    name: "PHP ${{ matrix.php }} (deps: ${{ matrix.deps }})"
     runs-on: ubuntu-latest
 
     strategy:
@@ -105,8 +104,8 @@ jobs:
             vendor/bin/phpcs
           fi
 
-      # --- 10. PHP-CS-Fixer (dry-run) - optional -----------------------------
-      - name: Run PHP-CS-Fixer (dry-run, if configured)
+      # --- 10. PHP-CBF (dry-run) - optional -----------------------------
+      - name: Run PHP-CBF (dry-run, if configured)
         if: ${{ hashFiles('.php-cs-fixer.dist.php', '.php-cs-fixer.php') != '' }}
         run: |
           if [ -f vendor/bin/phpcbf ]; then
