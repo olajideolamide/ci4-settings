@@ -1,0 +1,79 @@
+name: PHPStan
+
+on:
+  pull_request:
+    branches: [ "main", "develop" ]
+  # Manual runs from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  tests:
+    name: "PHP ${{ matrix.php }} (deps: ${{ matrix.deps }})"
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        php: [ "8.2" ]
+        deps: [ "stable" ]
+
+    env:
+      # Typical CI4 testing env values
+      APP_ENV: testing
+      CI_ENVIRONMENT: testing
+
+    steps:
+      # --- 1. Checkout code ---------------------------------------------------
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # --- 2. Setup PHP -------------------------------------------------------
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mbstring, intl, json, pdo_mysql, sqlite3
+          ini-values: |
+            memory_limit=512M
+          coverage: none
+          tools: composer
+
+      # --- 3. Cache Composer dependencies ------------------------------------
+      - name: Get Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-php-${{ matrix.php }}-${{ matrix.deps }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-${{ matrix.php }}-${{ matrix.deps }}-composer-
+
+      # --- 4. Install dependencies -------------------------------------------
+      - name: Install Composer dependencies
+        run: |
+          if [ "${{ matrix.deps }}" = "lowest" ]; then
+            composer update --prefer-lowest --no-interaction --no-progress
+          else
+            composer install --no-interaction --no-progress --prefer-dist
+          fi
+
+      # --- 5. Prepare .env for CodeIgniter 4----------------------
+      # name it `.env.github-ci`
+      - name: Prepare .env
+        run: |
+          if [ -f .env.github-ci ]; then
+            cp .env.github-ci .env
+          elif [ -f env ]; then
+            cp env .env
+          fi
+
+      # --- 6. Static analysis (PHPStan) - ---------------------------
+      - name: Run PHPStan (if configured)
+        if: ${{ hashFiles('phpstan.neon*') != '' }}
+        run: |
+          if [ -f vendor/bin/phpstan ]; then
+            vendor/bin/phpstan analyse src tests --no-progress
+          fi

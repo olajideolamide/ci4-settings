@@ -1,4 +1,4 @@
-name: PHPUnit
+name: PHPCS
 
 on:
   pull_request:
@@ -70,31 +70,7 @@ jobs:
             cp env .env
           fi
 
-      # --- 6. Basic PHP syntax check -----------------------------------------
-      - name: PHP syntax check (lint)
-        run: |
-          find src tests app -type f -name "*.php" 2>/dev/null \
-          | xargs -r -n 1 php -l
-
-      # --- 7. Run unit tests (PHPUnit) ---------------------------------------
-      - name: Run PHPUnit tests
-        run: |
-          if [ -f vendor/bin/phpunit ]; then
-            vendor/bin/phpunit --testdox
-          else
-            echo "PHPUnit not found. Did you require it as a dev dependency?" >&2
-            exit 1
-          fi
-
-      # --- 8. Static analysis (PHPStan) - optional ---------------------------
-      - name: Run PHPStan (if configured)
-        if: ${{ hashFiles('phpstan.neon*') != '' }}
-        run: |
-          if [ -f vendor/bin/phpstan ]; then
-            vendor/bin/phpstan analyse src tests --no-progress
-          fi
-
-      # --- 9. Coding standards (PHPCS) - optional ----------------------------
+      # --- 6. Coding standards (PHPCS) - optional ----------------------------
       - name: Run PHPCS (if configured)
         if: ${{ hashFiles('phpcs.xml*') != '' }}
         run: |
@@ -102,7 +78,7 @@ jobs:
             vendor/bin/phpcs
           fi
 
-      # --- 10. PHP-CBF (dry-run) - optional -----------------------------
+      # --- 7. PHP-CBF (dry-run) - optional -----------------------------
       - name: Run PHP-CBF (dry-run, if configured)
         if: ${{ hashFiles('.php-cs-fixer.dist.php', '.php-cs-fixer.php') != '' }}
         run: |

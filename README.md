@@ -7,7 +7,9 @@
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/olajideolamide/ci4-settings.svg)](https://packagist.org/packages/olajideolamide/ci4-settings)
 ![GitHub License](https://img.shields.io/github/license/olajideolamide/ci4-settings)
-![PHP CI](https://github.com/olajideolamide/ci4-settings/actions/workflows/action.yml/badge.svg)
+![PHP UNIT](https://github.com/olajideolamide/ci4-settings/actions/workflows/phpunit.yml/badge.svg)
+![PHP STAN](https://github.com/olajideolamide/ci4-settings/actions/workflows/phpstan.yml/badge.svg)
+![PHP CS](https://github.com/olajideolamide/ci4-settings/actions/workflows/phpcs.yml/badge.svg)
 
 
 
